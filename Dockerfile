@@ -1,6 +1,6 @@
 FROM node:20
 
-# Install required dependencies
+# Install dependencies required for Ollama
 RUN apt-get update && apt-get install -y \
     curl \
     zstd \
@@ -21,5 +21,5 @@ EXPOSE 11434
 
 CMD ollama serve & \
     sleep 5 && \
-    ollama pull llama3 && \
+    ollama pull gemma:2b && \
     node server.js

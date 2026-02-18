@@ -5,17 +5,9 @@ import cors from "cors";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-/*
-  Enable CORS
-  - Allow localhost (dev)
-  - Allow your deployed frontend (update when needed)
-*/
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://your-frontend-domain.com"
-    ],
+    origin: ["http://localhost:5173"],
     methods: ["GET", "POST"],
   })
 );
@@ -24,10 +16,9 @@ app.use(express.json());
 
 // Health check
 app.get("/", (_, res) => {
-  res.json({ status: "Ollama backend running" });
+  res.json({ status: "Gemma backend running" });
 });
 
-// Chat endpoint
 app.post("/chat", async (req, res) => {
   try {
     if (!req.body.messages) {
@@ -38,7 +29,7 @@ app.post("/chat", async (req, res) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "llama3",
+        model: "gemma:2b",   // ✅ changed here
         messages: req.body.messages,
         stream: false,
       }),
