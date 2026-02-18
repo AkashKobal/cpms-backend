@@ -1,11 +1,26 @@
 import express from "express";
 import fetch from "node-fetch";
-import { exec } from "child_process";
+import cors from "cors";
 
 const app = express();
-app.use(express.json());
-
 const PORT = process.env.PORT || 3000;
+
+/*
+  Enable CORS
+  - Allow localhost (dev)
+  - Allow your deployed frontend (update when needed)
+*/
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://your-frontend-domain.com"
+    ],
+    methods: ["GET", "POST"],
+  })
+);
+
+app.use(express.json());
 
 // Health check
 app.get("/", (_, res) => {
@@ -15,20 +30,36 @@ app.get("/", (_, res) => {
 // Chat endpoint
 app.post("/chat", async (req, res) => {
   try {
+    if (!req.body.messages) {
+      return res.status(400).json({ error: "Messages are required" });
+    }
+
     const response = await fetch("http://localhost:11434/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "llama3",
         messages: req.body.messages,
-        stream: false
-      })
+        stream: false,
+      }),
     });
 
+    if (!response.ok) {
+      const errorText = await response.text();
+      return res.status(500).json({
+        error: "Ollama responded with error",
+        details: errorText,
+      });
+    }
+
     const data = await response.json();
-    res.json(data);
+
+    res.json({
+      message: data.message,
+    });
   } catch (error) {
-    res.status(500).json({ error: "Ollama error" });
+    console.error("Ollama error:", error);
+    res.status(500).json({ error: "Ollama server error" });
   }
 });
 
