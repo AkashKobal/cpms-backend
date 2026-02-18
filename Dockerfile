@@ -1,7 +1,10 @@
 FROM node:20
 
-# Install curl
-RUN apt-get update && apt-get install -y curl
+# Install required dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    zstd \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Ollama
 RUN curl -fsSL https://ollama.com/install.sh | sh
